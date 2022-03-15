@@ -17,7 +17,7 @@ namespace RPG.Control {
             if (InteractWithMovement())
                 return;
 
-            Debug.Log("Nothing to do here.");
+            //Debug.Log("Nothing to do here.");
         }
 
         private bool InteractWithCombat() {
@@ -27,11 +27,14 @@ namespace RPG.Control {
             foreach(RaycastHit hit in hits) {
                 // check if the hit object is a worthy combat component
                 if (hit.transform.TryGetComponent(out CombatTarget ct)) {
-                // attack on mouse click
-                if (Input.GetMouseButtonDown(0)) {
-                    GetComponent<Fighter>().Attack(ct);
-                }
-                return true;
+                    // check if target is valid and alive and can be attacked
+                    if (GetComponent<Fighter>().CanAttack(ct)) {
+                        // attack on mouse click
+                        if (Input.GetMouseButtonDown(0)) {
+                            GetComponent<Fighter>().Attack(ct);
+                        }
+                        return true;
+                    }
                 }
             }
             return false;
@@ -45,9 +48,9 @@ namespace RPG.Control {
                 // Input.GetMouseButton returns true as long as a mouse button is clicked
                 // use it to allow the player to continuously follow the mouse
                 if (Input.GetMouseButton(0)) {
-                // destination for the player's nav mesh agent
-                // player moves towards the point where the mouse clicked occured
-                GetComponent<Mover>().StartMoveAction(hit.point);
+                    // destination for the player's nav mesh agent
+                    // player moves towards the point where the mouse clicked occured
+                    GetComponent<Mover>().StartMoveAction(hit.point);
                 }
                 return true;
             }

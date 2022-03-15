@@ -18,7 +18,7 @@ namespace RPG.Core {
             // if there is no current action to cancel, do nothing
             // else cancel the current action
             if (currentAction !=  null) {
-                Debug.Log("Cancelling action: " + action);
+                //Debug.Log("Cancelling action: " + action);
                 // call the correct cancel action
                 currentAction.Cancel();
             }
