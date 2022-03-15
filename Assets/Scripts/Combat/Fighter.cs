@@ -10,6 +10,13 @@ namespace RPG.Combat {
 
         [SerializeField]
         float weaponRange = 2.0f;
+        [SerializeField]
+        float weaponDamage = 5.0f;
+
+        [SerializeField]
+        float timeBetweenAttacks = 1.0f;
+
+        float timeSinceLastAttack = 0.0f;
 
         Transform target;
 
@@ -20,6 +27,8 @@ namespace RPG.Combat {
         }
 
         private void Update() {
+            timeSinceLastAttack += Time.deltaTime;
+
             // if there is no combat target, then return from this function
             // allows the player to keep moving if we're just moving on the map
             if (target == null)
@@ -41,8 +50,21 @@ namespace RPG.Combat {
         }
 
         private void AttackBehaviour() {
-            // trigger the animation
-            GetComponent<Animator>().SetTrigger("attack");
+            // throttle the behaviour
+            if (timeSinceLastAttack >= timeBetweenAttacks) {
+                // trigger the animation, which will trigger the Hit() event for the animation
+                GetComponent<Animator>().SetTrigger("attack");
+                // reset
+                timeSinceLastAttack = 0.0f;
+            }
+        }
+
+        void Hit() {
+            // animation 'hit' event receiver
+
+            // apply damage to combat target to match with the timing of the animation
+            Health healthComponent = target.GetComponent<Health>();
+            healthComponent.TakeDamage(weaponDamage);
         }
 
         public void Attack (CombatTarget combatTarget) {
@@ -57,8 +79,6 @@ namespace RPG.Combat {
             target = null;
         }
 
-        void Hit() {
-            // animation 'hit' event receiver
-        }
+
     }
 }
