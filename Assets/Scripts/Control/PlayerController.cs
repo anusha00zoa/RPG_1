@@ -37,7 +37,7 @@ namespace RPG.Control {
                     // check if target is valid and alive and can be attacked
                     if (GetComponent<Fighter>().CanAttack(ct.gameObject)) {
                         // attack on mouse click
-                        if (Input.GetMouseButtonDown(0)) {
+                        if (Input.GetMouseButton(0)) {
                             GetComponent<Fighter>().Attack(ct.gameObject);
                         }
                         return true;

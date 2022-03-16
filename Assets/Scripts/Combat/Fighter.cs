@@ -49,7 +49,7 @@ namespace RPG.Combat {
         }
 
         private bool GetIsInRange() {
-            return Vector3.Distance(this.transform.position, target.transform.position) < weaponRange;
+            return Vector3.Distance(transform.position, target.transform.position) < weaponRange;
         }
 
         private void AttackBehaviour() {

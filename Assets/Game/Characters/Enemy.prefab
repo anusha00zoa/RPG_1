@@ -9,7 +9,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 935683390873915882, guid: 30f3b7467a479a1478f9da099e5cac66, type: 3}
       propertyPath: m_Speed
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 1445594024444986601, guid: 30f3b7467a479a1478f9da099e5cac66, type: 3}
       propertyPath: healthPoints
@@ -100,6 +100,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   chaseDistance: 5
+  suspicionTime: 5
+  waypointTolerance: 1
+  patrolPath: {fileID: 0}
 --- !u!114 &7598536993841073814
 MonoBehaviour:
   m_ObjectHideFlags: 0
