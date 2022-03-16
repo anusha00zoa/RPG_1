@@ -5,7 +5,6 @@ using RPG.Movement;
 using RPG.Core;
 
 namespace RPG.Combat {
-
     public class Fighter : MonoBehaviour, IAction {
 
         [SerializeField]
@@ -16,7 +15,7 @@ namespace RPG.Combat {
         [SerializeField]
         float timeBetweenAttacks = 1.0f;
 
-        float timeSinceLastAttack = 0.0f;
+        float timeSinceLastAttack = Mathf.Infinity;
 
         Health target;
 
@@ -84,16 +83,16 @@ namespace RPG.Combat {
             // healthComponent.TakeDamage(weaponDamage);
         }
 
-        public void Attack (CombatTarget combatTarget) {
+        public void Attack (GameObject combatTarget) {
             GetComponent<ActionScheduler>().StartAction(this);
 
             //Debug.Log("Take that dipshit!!");
             target = combatTarget.GetComponent<Health>();
         }
 
-        public bool CanAttack(CombatTarget ct) {
+        public bool CanAttack(GameObject combatTarget) {
             // if there is no target and if the target is not dead, then we can attack
-            if(ct != null && !ct.GetComponent<Health>().IsDead())
+            if(combatTarget != null && !combatTarget.GetComponent<Health>().IsDead())
                 return true;
 
             return false;

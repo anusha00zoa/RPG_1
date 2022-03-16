@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace RPG.Combat {
+namespace RPG.Core {
     public class Health : MonoBehaviour {
 
         [SerializeField] float healthPoints = 100.0f;
@@ -23,8 +23,11 @@ namespace RPG.Combat {
 
         void Die() {
             if (!isDead) {
-                GetComponent<Animator>().SetTrigger("die");
                 isDead = true;
+                GetComponent<Animator>().SetTrigger("die");
+
+                // when dead, the character should stop moving
+                GetComponent<ActionScheduler>().CancelCurrentAction();
             }
         }
     }

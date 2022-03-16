@@ -7,19 +7,23 @@ using UnityEngine.AI;
 using RPG.Core;
 
 namespace RPG.Movement {
-
     public class Mover : MonoBehaviour, IAction {
 
         [SerializeField]
         public Transform target;
 
         private NavMeshAgent navMeshAgent;
+        Health health;
 
         private void Start() {
             navMeshAgent = GetComponent<NavMeshAgent>();
+            health = GetComponent<Health>();
         }
 
         void Update() {
+            // to prevent a dead character's nav mesh agent blocking others from moving around/through it
+            navMeshAgent.enabled = !health.IsDead();
+
             // animate our player character
             UpdateAnimator();
         }

@@ -3,12 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 using RPG.Movement;
 using RPG.Combat;
+using RPG.Core;
 
 namespace RPG.Control {
-
     public class PlayerController : MonoBehaviour {
 
+        Health health;
+
+        private void Start() {
+            health = GetComponent<Health>();
+        }
+
         void Update() {
+        if (health.IsDead())
+            return;
+
             // do player combat actions, dont move player while in combat
             if (InteractWithCombat())
                 return;
@@ -16,8 +25,6 @@ namespace RPG.Control {
             // if no combat occured, do player movement actions
             if (InteractWithMovement())
                 return;
-
-            //Debug.Log("Nothing to do here.");
         }
 
         private bool InteractWithCombat() {
@@ -28,10 +35,10 @@ namespace RPG.Control {
                 // check if the hit object is a worthy combat component
                 if (hit.transform.TryGetComponent(out CombatTarget ct)) {
                     // check if target is valid and alive and can be attacked
-                    if (GetComponent<Fighter>().CanAttack(ct)) {
+                    if (GetComponent<Fighter>().CanAttack(ct.gameObject)) {
                         // attack on mouse click
                         if (Input.GetMouseButtonDown(0)) {
-                            GetComponent<Fighter>().Attack(ct);
+                            GetComponent<Fighter>().Attack(ct.gameObject);
                         }
                         return true;
                     }

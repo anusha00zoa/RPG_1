@@ -5,7 +5,6 @@ using RPG.Movement;
 using RPG.Combat;
 
 namespace RPG.Core {
-
     public class ActionScheduler : MonoBehaviour {
 
         IAction currentAction = null;
@@ -26,6 +25,10 @@ namespace RPG.Core {
             // update the current action
             currentAction = action;
 
+        }
+
+        public void CancelCurrentAction() {
+            StartAction(null);
         }
     }
 }
