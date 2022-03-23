@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using RPG.Combat;
 using RPG.Core;
@@ -8,11 +6,13 @@ using RPG.Movement;
 namespace RPG.Control {
     public class AIController : MonoBehaviour
     {
-        [SerializeField] public float chaseDistance = 5.0f;
-        [SerializeField] public float suspicionTime = 5.0f;
-        [SerializeField] public float waypointDwellTime = 5.0f;
-        [SerializeField] public float waypointTolerance = 1.0f;
-        [SerializeField] public PatrolPath patrolPath;
+        [SerializeField] float chaseDistance = 5.0f;
+        [SerializeField] float suspicionTime = 5.0f;
+        [SerializeField] float waypointDwellTime = 5.0f;
+        [SerializeField] float waypointTolerance = 1.0f;
+        [Range(0,1)]
+        [SerializeField] float patrolSpeedFraction = 0.2f;
+        [SerializeField] PatrolPath patrolPath;
 
         Vector3 guardPosition;
 
@@ -108,7 +108,7 @@ namespace RPG.Control {
 
             if (timeSinceArrivedAtWaypoint > waypointDwellTime) {
                 // StartMoveAction should automatically cancel the attack
-                mover.StartMoveAction(nextPosition);
+                mover.StartMoveAction(nextPosition, patrolSpeedFraction);
             }
         }
 

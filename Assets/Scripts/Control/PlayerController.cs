@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using RPG.Movement;
 using RPG.Combat;
@@ -57,7 +55,7 @@ namespace RPG.Control {
                 if (Input.GetMouseButton(0)) {
                     // destination for the player's nav mesh agent
                     // player moves towards the point where the mouse clicked occured
-                    GetComponent<Mover>().StartMoveAction(hit.point);
+                    GetComponent<Mover>().StartMoveAction(hit.point, 1.0f);
                 }
                 return true;
             }

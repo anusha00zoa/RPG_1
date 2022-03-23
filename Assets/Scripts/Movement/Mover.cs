@@ -1,7 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.Serialization;
 using UnityEngine;
 using UnityEngine.AI;
 using RPG.Core;
@@ -9,8 +5,8 @@ using RPG.Core;
 namespace RPG.Movement {
     public class Mover : MonoBehaviour, IAction {
 
-        [SerializeField]
-        public Transform target;
+        [SerializeField] Transform target;
+        [SerializeField] float maxSpeed = 6.0f;
 
         private NavMeshAgent navMeshAgent;
         Health health;
@@ -28,14 +24,15 @@ namespace RPG.Movement {
             UpdateAnimator();
         }
 
-        public void StartMoveAction(Vector3 destination) {
+        public void StartMoveAction(Vector3 destination, float speedFraction) {
             GetComponent<ActionScheduler>().StartAction(this);
             // start movement
-            MoveTo(destination);
+            MoveTo(destination, speedFraction);
         }
 
-        public void MoveTo(Vector3 dest) {
+        public void MoveTo(Vector3 dest, float speedFraction) {
             navMeshAgent.destination = dest;
+            navMeshAgent.speed = maxSpeed * Mathf.Clamp01(speedFraction);
             navMeshAgent.isStopped = false;
         }
 

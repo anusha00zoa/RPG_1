@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using RPG.Movement;
 using RPG.Core;
@@ -7,13 +5,9 @@ using RPG.Core;
 namespace RPG.Combat {
     public class Fighter : MonoBehaviour, IAction {
 
-        [SerializeField]
-        float weaponRange = 2.0f;
-        [SerializeField]
-        float weaponDamage = 5.0f;
-
-        [SerializeField]
-        float timeBetweenAttacks = 1.0f;
+        [SerializeField] float weaponRange = 2.0f;
+        [SerializeField] float weaponDamage = 5.0f;
+        [SerializeField] float timeBetweenAttacks = 1.0f;
 
         float timeSinceLastAttack = Mathf.Infinity;
 
@@ -39,7 +33,7 @@ namespace RPG.Combat {
 
             // get within range of the combat target
             if (!GetIsInRange()) {
-                mover.MoveTo(target.transform.position);
+                mover.MoveTo(target.transform.position, 1.0f);
             }
             else {
                 // stop once in range of combat target
@@ -104,6 +98,9 @@ namespace RPG.Combat {
 
             // member function required as we inherit from IAction
             target = null;
+
+            // cancel movement
+            GetComponent<Mover>().Cancel();
         }
 
         private void StopAttack() {
