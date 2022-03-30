@@ -16,20 +16,15 @@ namespace RPG.SceneManagement {
         [SerializeField] int sceneToLoad = -1;
         [SerializeField] Transform spawnPoint;
         [SerializeField] DestinationIdentifier destination;
-        [SerializeField] float fadeOutTime = 2.0f;
-        [SerializeField] float fadeInTime = 3.0f;
+        [SerializeField] float fadeOutTime = 1.0f;
+        [SerializeField] float fadeInTime = 2.0f;
         [SerializeField] float fadeWaitTime = 0.5f;
-
-
-        GameObject player;
-
-        private bool alreadyTriggered = false;
+        private GameObject player;
 
         private void OnTriggerEnter(Collider other) {
             // trigger only by Player omce
-            if (!alreadyTriggered && other.gameObject.tag == "Player") {
+            if (other.gameObject.tag == "Player") {
                 StartCoroutine(Transition());
-                alreadyTriggered = true;
             }
         }
 
@@ -44,6 +39,10 @@ namespace RPG.SceneManagement {
             Fader fader = FindObjectOfType<Fader>();
             yield return fader.FadeOut(fadeOutTime);
 
+            // Save current level
+            SavingWrapper savingWrapper = FindObjectOfType<SavingWrapper>();
+            savingWrapper.Save();
+
             AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneToLoad);
             // Wait until the asynchronous scene fully loads
             while (!asyncLoad.isDone) {
@@ -51,20 +50,26 @@ namespace RPG.SceneManagement {
             }
             // Debug.Log("Scene finished loading.");
 
-            // get portal in scene you just spawned player into and position player at spawn point
+            // Load current level
+            savingWrapper.Load();
+
+            // Get portal in scene you just spawned player into and position player at spawn point
             Portal otherPortal = GetOtherPortal();
             UpdatePlayer(otherPortal);
 
+            // save at this point so that we can directly load at this point after we've gone through the portal
+            savingWrapper.Save();
+
             yield return new WaitForSeconds(fadeWaitTime);
-            yield return fader.FadeIn(3.0f);
+            yield return fader.FadeIn(fadeInTime);
 
             // Destroy the portal after transitioning to prevent re-entry
             Destroy(gameObject);
         }
 
         private void UpdatePlayer(Portal otherPortal) {
-            // update player's position and rotation
-            // use navmesh agent to update because sometimes it wants to set the player's position
+            // Update player's position and rotation
+            // Use navmesh agent to update because sometimes it wants to set the player's position
             player = GameObject.FindWithTag("Player");
             player.GetComponent<NavMeshAgent>().Warp(otherPortal.spawnPoint.position);
             player.transform.rotation = otherPortal.spawnPoint.rotation;
@@ -75,9 +80,9 @@ namespace RPG.SceneManagement {
 
             // foreach (Portal portal in FindObjectsOfType<Portal>()) {
             foreach (GameObject portal in GameObject.FindGameObjectsWithTag("Portal")) {
-                if (portal == gameObject || portal == null)
+                if (portal == gameObject)
                     continue;
-                if(portal.GetComponent<Portal>().destination == destination)
+                if(portal.GetComponent<Portal>().destination != destination)
                     continue;
 
                 return portal.GetComponent<Portal>();

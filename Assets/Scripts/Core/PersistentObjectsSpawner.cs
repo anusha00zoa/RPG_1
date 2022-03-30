@@ -12,6 +12,7 @@ namespace RPG.Core {
                 return;
 
             SpawnPersistentObjects();
+            hasSpawned = true;
         }
 
         private void SpawnPersistentObjects() {
