@@ -5,9 +5,11 @@ using RPG.Core;
 namespace RPG.Combat {
     public class Fighter : MonoBehaviour, IAction {
 
-        [SerializeField] float weaponRange = 2.0f;
-        [SerializeField] float weaponDamage = 5.0f;
         [SerializeField] float timeBetweenAttacks = 1.0f;
+        [SerializeField] Transform handTransform = null;
+        [SerializeField] Weapon defaultWeapon = null;
+
+        Weapon currentWeapon = null;
 
         float timeSinceLastAttack = Mathf.Infinity;
 
@@ -17,6 +19,8 @@ namespace RPG.Combat {
 
         private void Start() {
             mover = GetComponent<Mover>();
+
+            EquipWeapon(defaultWeapon);
         }
 
         private void Update() {
@@ -42,8 +46,45 @@ namespace RPG.Combat {
             }
         }
 
+        public void Attack (GameObject combatTarget) {
+            GetComponent<ActionScheduler>().StartAction(this);
+
+            //Debug.Log("Take that dipshit!!");
+            target = combatTarget.GetComponent<Health>();
+        }
+
+        public bool CanAttack(GameObject combatTarget) {
+            // if there is no target and if the target is not dead, then we can attack
+            if(combatTarget != null && !combatTarget.GetComponent<Health>().IsDead())
+                return true;
+
+            return false;
+        }
+
+        public void Cancel() {
+            // stop the animation
+            StopAttack();
+
+            // member function required as we inherit from IAction
+            target = null;
+
+            // cancel movement
+            GetComponent<Mover>().Cancel();
+        }
+
+        public void EquipWeapon(Weapon weapon) {
+            if (weapon == null)
+                return;
+
+            currentWeapon = weapon;
+
+            // spawn the weapon and override the animation with the appropriate weapon override
+            Animator animator = GetComponent<Animator>();
+            currentWeapon.Spawn(handTransform, animator);
+        }
+
         private bool GetIsInRange() {
-            return Vector3.Distance(transform.position, target.transform.position) < weaponRange;
+            return Vector3.Distance(transform.position, target.transform.position) < currentWeapon.GetRange();
         }
 
         private void AttackBehaviour() {
@@ -72,35 +113,9 @@ namespace RPG.Combat {
             if (target == null)
                 return;
 
-            target.TakeDamage(weaponDamage);
+            target.TakeDamage(currentWeapon.GetDamage());
             // Health healthComponent = target.GetComponent<Health>();
             // healthComponent.TakeDamage(weaponDamage);
-        }
-
-        public void Attack (GameObject combatTarget) {
-            GetComponent<ActionScheduler>().StartAction(this);
-
-            //Debug.Log("Take that dipshit!!");
-            target = combatTarget.GetComponent<Health>();
-        }
-
-        public bool CanAttack(GameObject combatTarget) {
-            // if there is no target and if the target is not dead, then we can attack
-            if(combatTarget != null && !combatTarget.GetComponent<Health>().IsDead())
-                return true;
-
-            return false;
-        }
-
-        public void Cancel() {
-            // stop the animation
-            StopAttack();
-
-            // member function required as we inherit from IAction
-            target = null;
-
-            // cancel movement
-            GetComponent<Mover>().Cancel();
         }
 
         private void StopAttack() {

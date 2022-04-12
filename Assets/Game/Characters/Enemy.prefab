@@ -103,6 +103,7 @@ MonoBehaviour:
   suspicionTime: 5
   waypointDwellTime: 5
   waypointTolerance: 1
+  patrolSpeedFraction: 0.2
   patrolPath: {fileID: 0}
 --- !u!114 &7598536993841073814
 MonoBehaviour:
@@ -116,9 +117,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7c81c89f423f0f408068833bc15dda6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  weaponRange: 1.5
-  weaponDamage: 4
   timeBetweenAttacks: 1
+  handTransform: {fileID: 8197190423571136248}
+  defaultWeapon: {fileID: 11400000, guid: 8bb693892fa12b54abf17cb4722ab928, type: 2}
 --- !u!1001 &8197190423571499510
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -176,3 +177,8 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 30cf93deff988e74e88a144bd2127c18, type: 3}
+--- !u!4 &8197190423571136248 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 423694, guid: 30cf93deff988e74e88a144bd2127c18, type: 3}
+  m_PrefabInstance: {fileID: 8197190423571499510}
+  m_PrefabAsset: {fileID: 0}
