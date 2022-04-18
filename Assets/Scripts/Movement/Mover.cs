@@ -57,6 +57,7 @@ namespace RPG.Movement {
         }
 
         // using a struct to capture / restore data - do not need to do any casting
+        [System.Serializable]
         struct MoverSaveData {
             public SerializableVector3 position;
             public SerializableVector3 rotation;
@@ -72,7 +73,7 @@ namespace RPG.Movement {
 
         // member function required as we inherit from ISaveable
         public void RestoreState(object state) {
-            // casting to SerializableVector3 because we know for sure that is what it is stored as
+            // casting to MoverSaveData because we know for sure that is what it is stored as
             MoverSaveData data = (MoverSaveData)state;
 
             // set the position without the character's nav mesh agent interfering

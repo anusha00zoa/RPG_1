@@ -1,13 +1,16 @@
 using UnityEngine;
 using RPG.Movement;
 using RPG.Core;
+using RPG.Saving;
 
 namespace RPG.Combat {
-    public class Fighter : MonoBehaviour, IAction {
+    public class Fighter : MonoBehaviour, IAction, ISaveable {
 
         [SerializeField] float timeBetweenAttacks = 1.0f;
-        [SerializeField] Transform handTransform = null;
+        [SerializeField] Transform rightHandTransform = null;
+        [SerializeField] Transform leftHandTransform = null;
         [SerializeField] Weapon defaultWeapon = null;
+        [SerializeField] string defaultWeaponName = "Unarmed";
 
         Weapon currentWeapon = null;
 
@@ -20,7 +23,9 @@ namespace RPG.Combat {
         private void Start() {
             mover = GetComponent<Mover>();
 
-            EquipWeapon(defaultWeapon);
+            // only load defaultWeapon if there was no weapon loaded by the saving system
+            if (currentWeapon == null)
+                EquipWeapon(defaultWeapon);
         }
 
         private void Update() {
@@ -80,7 +85,7 @@ namespace RPG.Combat {
 
             // spawn the weapon and override the animation with the appropriate weapon override
             Animator animator = GetComponent<Animator>();
-            currentWeapon.Spawn(handTransform, animator);
+            currentWeapon.Spawn(rightHandTransform, leftHandTransform, animator);
         }
 
         private bool GetIsInRange() {
@@ -106,6 +111,12 @@ namespace RPG.Combat {
             GetComponent<Animator>().SetTrigger("attack");
         }
 
+        private void StopAttack() {
+            GetComponent<Animator>().SetTrigger("stopAttack");
+            GetComponent<Animator>().ResetTrigger("attack");
+        }
+
+        // begin animation event receivers
         void Hit() {
             // animation 'hit' event receiver
 
@@ -113,14 +124,32 @@ namespace RPG.Combat {
             if (target == null)
                 return;
 
-            target.TakeDamage(currentWeapon.GetDamage());
-            // Health healthComponent = target.GetComponent<Health>();
-            // healthComponent.TakeDamage(weaponDamage);
+            // if the equipped weapon has a projectile, launch it, if not take damage
+            if (currentWeapon.HasProjectile()) {
+                currentWeapon.LaunchProjectile(rightHandTransform, leftHandTransform, target);
+            }
+            else {
+                target.TakeDamage(currentWeapon.GetDamage());
+            }
         }
 
-        private void StopAttack() {
-            GetComponent<Animator>().SetTrigger("stopAttack");
-            GetComponent<Animator>().ResetTrigger("attack");
+        void Shoot() {
+            // animation 'shoot' event receiver
+            // same as 'hit'
+            Hit();
+        }
+        // end animation event receivers
+
+        // methods to implement ISaveable interface
+        public object CaptureState() {
+            return currentWeapon.name;
+        }
+
+        public void RestoreState(object state) {
+            string weaponName = (string)state;
+            // allows us to load weapons across scenes by finding it in 'Weapons/Resources' folder
+            Weapon weapon = Resources.Load<Weapon>(weaponName);
+            EquipWeapon(weapon);
         }
     }
 }
