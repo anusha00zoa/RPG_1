@@ -2,6 +2,7 @@ using UnityEngine;
 using RPG.Movement;
 using RPG.Core;
 using RPG.Saving;
+using RPG.Attributes;
 
 namespace RPG.Combat {
     public class Fighter : MonoBehaviour, IAction, ISaveable {
@@ -88,6 +89,10 @@ namespace RPG.Combat {
             currentWeapon.Spawn(rightHandTransform, leftHandTransform, animator);
         }
 
+        public Health GetTarget() {
+            return target;
+        }
+
         private bool GetIsInRange() {
             return Vector3.Distance(transform.position, target.transform.position) < currentWeapon.GetRange();
         }
@@ -126,10 +131,10 @@ namespace RPG.Combat {
 
             // if the equipped weapon has a projectile, launch it, if not take damage
             if (currentWeapon.HasProjectile()) {
-                currentWeapon.LaunchProjectile(rightHandTransform, leftHandTransform, target);
+                currentWeapon.LaunchProjectile(rightHandTransform, leftHandTransform, target, gameObject);
             }
             else {
-                target.TakeDamage(currentWeapon.GetDamage());
+                target.TakeDamage(currentWeapon.GetDamage(), gameObject);
             }
         }
 

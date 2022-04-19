@@ -1,6 +1,6 @@
 using System;
 using UnityEngine;
-using RPG.Core;
+using RPG.Attributes;
 
 namespace RPG.Combat {
 
@@ -17,6 +17,8 @@ namespace RPG.Combat {
 
         Health target = null;
 
+        GameObject instigator = null;
+
         private void Start() {
             transform.LookAt(GetAimLocation());
         }
@@ -31,9 +33,10 @@ namespace RPG.Combat {
         }
 
         // setter function
-        public void SetTarget(Health target, float damage) {
+        public void SetTarget(Health target, GameObject instigator, float damage) {
             this.target = target;
             this.damage = damage;
+            this.instigator = instigator;
 
             // if projectile doesnt hit anything, destroy after maxLifetime seconds
             Destroy(gameObject, maxLifetime);
@@ -58,7 +61,7 @@ namespace RPG.Combat {
                 return;
 
             // do damage and then destroy the projectile
-            target.TakeDamage(damage);
+            target.TakeDamage(damage, instigator);
 
             // on impact, projectile should stop moving
             speed = 0.0f;

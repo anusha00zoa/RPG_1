@@ -1,5 +1,5 @@
 using UnityEngine;
-using RPG.Core;
+using RPG.Attributes;
 using System;
 
 namespace RPG.Combat {
@@ -30,9 +30,9 @@ namespace RPG.Combat {
         }
         // end getter methods
 
-        public void LaunchProjectile(Transform rightHand, Transform leftHand, Health target) {
+        public void LaunchProjectile(Transform rightHand, Transform leftHand, Health target, GameObject instigator) {
             Projectile projectileInstance = Instantiate(projectile, GetHand(rightHand, leftHand).position, Quaternion.identity);
-            projectileInstance.SetTarget(target, weaponDamage);
+            projectileInstance.SetTarget(target, instigator, weaponDamage);
         }
 
         public void Spawn(Transform rightHand, Transform leftHand, Animator animator) {

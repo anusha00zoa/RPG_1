@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using RPG.Core;
 using RPG.Saving;
-using System.Collections.Generic;
+using RPG.Attributes;
 
 namespace RPG.Movement {
     public class Mover : MonoBehaviour, IAction, ISaveable {
