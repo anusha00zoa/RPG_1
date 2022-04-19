@@ -22,7 +22,8 @@ namespace RPG.Combat {
                 healthValueText.text = "No target";
                 return;
             }
-            healthValueText.text = String.Format("{0:0}%", target.GetHealthPercentage());
+            //healthValueText.text = String.Format("{0:0}%", target.GetHealthPercentage());
+            healthValueText.text = String.Format("{0:0.0} / {1:0.0}", target.GetHealthPoints(), target.GetMaxHealthPoints());
         }
     }
 }

@@ -3,6 +3,7 @@ using RPG.Movement;
 using RPG.Core;
 using RPG.Saving;
 using RPG.Attributes;
+using RPG.Stats;
 
 namespace RPG.Combat {
     public class Fighter : MonoBehaviour, IAction, ISaveable {
@@ -129,12 +130,13 @@ namespace RPG.Combat {
             if (target == null)
                 return;
 
+            float damage = GetComponent<BaseStats>().GetStat(Stat.Damage);
             // if the equipped weapon has a projectile, launch it, if not take damage
             if (currentWeapon.HasProjectile()) {
-                currentWeapon.LaunchProjectile(rightHandTransform, leftHandTransform, target, gameObject);
+                currentWeapon.LaunchProjectile(rightHandTransform, leftHandTransform, target, gameObject, damage);
             }
             else {
-                target.TakeDamage(currentWeapon.GetDamage(), gameObject);
+                target.TakeDamage(damage, gameObject);
             }
         }
 

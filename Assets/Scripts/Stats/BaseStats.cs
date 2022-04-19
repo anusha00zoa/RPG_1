@@ -12,12 +12,15 @@ namespace RPG.Stats {
 
         int currentLevel = 0;
 
+        // delegate for notifying game when user has levelled up
+        public event Action onLevelUp;
+
         private void Start() {
             currentLevel = CalculateLevel();
             Experience experience = GetComponent<Experience>();
             if (experience != null) {
                 // subscribing to the delegate in Experience
-                experience.OnExperienceGained += UpdateLevel;
+                experience.onExperienceGained += UpdateLevel;
             }
         }
 
@@ -30,7 +33,6 @@ namespace RPG.Stats {
             if (currentLevel < 1)
                 currentLevel = CalculateLevel();
 
-            print("GetLevel: " + currentLevel);
             return currentLevel;
         }
 
@@ -58,7 +60,8 @@ namespace RPG.Stats {
             int newLevel = CalculateLevel();
             if (newLevel > currentLevel) {
                 currentLevel = newLevel;
-                //LevelUpEffect();
+                LevelUpEffect();
+                onLevelUp();
             }
         }
 

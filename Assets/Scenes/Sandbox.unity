@@ -1759,6 +1759,10 @@ PrefabInstance:
       propertyPath: uniqueIdentifier
       value: b40ab355-7d10-4bf5-87d0-34d9c76195f2
       objectReference: {fileID: 0}
+    - target: {fileID: 3744873244511429479, guid: 4c6c9efc1d00cb345abc86222cef5868, type: 3}
+      propertyPath: healthPoints
+      value: 30
+      objectReference: {fileID: 0}
     - target: {fileID: 5066910014787779654, guid: 4c6c9efc1d00cb345abc86222cef5868, type: 3}
       propertyPath: defaultWeapon
       value: 
@@ -3036,7 +3040,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2079076075634381239, guid: 8f8f2403df5bb3e47b8893e2dd502af2, type: 3}
       propertyPath: healthPoints
-      value: 80
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 2478393817990387853, guid: 8f8f2403df5bb3e47b8893e2dd502af2, type: 3}
       propertyPath: characterClass

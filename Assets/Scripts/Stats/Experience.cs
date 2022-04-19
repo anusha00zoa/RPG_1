@@ -7,14 +7,14 @@ namespace RPG.Stats {
 
         [SerializeField] float experiencePoints = 0.0f;
 
-        /* delegate for notifying game when user has levelled up
+        /* delegate for notifying game when user has gained experience
             first way to create your own delegate and create an event
             second way is to use C#'s built-in 'Action'
                 - a predefined delegate with no return value and no parameters to pass in
         */
         // public delegate void ExperienceGainedDelegate();
-        // public event ExperienceGainedDelegate OnExperienceGained;
-        public event Action OnExperienceGained;
+        // public event ExperienceGainedDelegate onExperienceGained;
+        public event Action onExperienceGained;
 
         public float GetPoints() {
             return experiencePoints;
@@ -22,6 +22,7 @@ namespace RPG.Stats {
 
         public void GainExperience(float experience) {
             experiencePoints += experience;
+            onExperienceGained();
         }
 
         // member function required as we inherit from ISaveable

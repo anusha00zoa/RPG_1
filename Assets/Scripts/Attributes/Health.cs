@@ -7,17 +7,24 @@ using System;
 namespace RPG.Attributes {
     public class Health : MonoBehaviour, ISaveable {
 
-        float healthPoints = -1f;
-
-        private float maxHealthPoints = 0.0f;
+        [SerializeField] float healthPoints = -1f;
+        [SerializeField] float regenerationPercent = 70.0f;
 
         private bool isDead = false;
 
+        BaseStats baseStats;
+
         private void Start() {
-            if (healthPoints < 0.0f) {
-                // RestoreState has not updated the healthPoints, we use basestats to get starting health
-                healthPoints = GetComponent<BaseStats>().GetStat(Stat.Health);
-                maxHealthPoints = healthPoints;
+            baseStats = GetComponent<BaseStats>();
+
+            if (baseStats != null) {
+                if (healthPoints < 0.0f) {
+                    // RestoreState has not updated the healthPoints, we use basestats to get starting health
+                    healthPoints = baseStats.GetStat(Stat.Health);
+                }
+
+                // subscribing to the delegate in BaseStats
+                baseStats.onLevelUp += RegenerateHealth;
             }
         }
 
@@ -26,12 +33,24 @@ namespace RPG.Attributes {
             return isDead;
         }
 
+        // getter for max healthPoints
+        public float GetMaxHealthPoints() {
+            return baseStats.GetStat(Stat.Health);
+        }
+
+        // get current healthPoints
+        public float GetHealthPoints() {
+            return healthPoints;
+        }
+
         // getter for healthPoints as a percentage
         public float GetHealthPercentage() {
-            return healthPoints / maxHealthPoints * 100;
+            return healthPoints / baseStats.GetStat(Stat.Health) * 100;
         }
 
         public void TakeDamage(float damage, GameObject instigator) {
+            //print(gameObject.name + " took damage: " + damage);
+
             healthPoints = Mathf.Max(healthPoints - damage, 0.0f);
             if (healthPoints == 0.0f) {
                 Die();
@@ -55,7 +74,12 @@ namespace RPG.Attributes {
             if (experience == null)
                 return;
 
-            experience.GainExperience(GetComponent<BaseStats>().GetStat(Stat.ExperienceReward));
+            experience.GainExperience(baseStats.GetStat(Stat.ExperienceReward));
+        }
+
+        private void RegenerateHealth() {
+            float regenHealthPoints = baseStats.GetStat(Stat.Health) * regenerationPercent / 100;
+            healthPoints = Mathf.Max(regenHealthPoints, healthPoints);
         }
 
         // member function required as we inherit from ISaveable
