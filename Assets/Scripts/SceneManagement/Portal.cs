@@ -19,6 +19,7 @@ namespace RPG.SceneManagement {
         [SerializeField] float fadeOutTime = 1.0f;
         [SerializeField] float fadeInTime = 2.0f;
         [SerializeField] float fadeWaitTime = 0.5f;
+
         private GameObject player;
 
         private void OnTriggerEnter(Collider other) {

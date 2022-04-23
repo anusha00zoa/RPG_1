@@ -14,6 +14,7 @@ namespace RPG.Combat {
         [SerializeField] Projectile projectile = null;
         [SerializeField] float weaponRange = 1.0f;
         [SerializeField] float weaponDamage = 1.0f;
+        [SerializeField] float percentageBonus = 0.0f;
         [SerializeField] bool isRightHanded = true;
 
         // begin getter methods
@@ -23,6 +24,10 @@ namespace RPG.Combat {
 
         public float GetDamage() {
             return weaponDamage;
+        }
+
+        public float GetPercentageBonus() {
+            return percentageBonus;
         }
 
         public bool HasProjectile() {

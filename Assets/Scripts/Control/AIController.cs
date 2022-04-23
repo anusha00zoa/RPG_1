@@ -3,6 +3,8 @@ using RPG.Combat;
 using RPG.Core;
 using RPG.Attributes;
 using RPG.Movement;
+using GameDevTV.Utils;
+using System;
 
 namespace RPG.Control {
     public class AIController : MonoBehaviour
@@ -15,9 +17,9 @@ namespace RPG.Control {
         [SerializeField] float patrolSpeedFraction = 0.2f;
         [SerializeField] PatrolPath patrolPath;
 
-        Vector3 guardPosition;
+        LazyValue<Vector3> guardPosition;
 
-        int currentWaypointIndex = 0;
+        int currentWaypointIndex;
 
         float timeSinceLastSeenPlayer = Mathf.Infinity;
         float timeSinceArrivedAtWaypoint = Mathf.Infinity;
@@ -28,7 +30,7 @@ namespace RPG.Control {
         Health health;
         Mover mover;
 
-        private void Start() {
+        private void Awake() {
             // Find player using tags
             player = GameObject.FindWithTag("Player");
 
@@ -36,8 +38,12 @@ namespace RPG.Control {
             health = GetComponent<Health>();
             mover = GetComponent<Mover>();
 
+            guardPosition = new LazyValue<Vector3>(GetInitialGuardPosition);
+        }
+
+        private void Start() {
             // starting position for the character and the position it should return back to everytime (typically one of the waypoints on the patrol path)
-            guardPosition = transform.position;
+            guardPosition.ForceInit();
         }
 
         private void Update() {
@@ -54,12 +60,15 @@ namespace RPG.Control {
                 SuspicionBehaviour();
             }
             else {
-                // // cancel the attack
-                // fighter.Cancel();
+                // cancel the attack
                 PatrolBehaviour();
             }
 
             UpdateTimers();
+        }
+
+        private Vector3 GetInitialGuardPosition() {
+            return transform.position;
         }
 
         private void UpdateTimers() {
@@ -97,7 +106,7 @@ namespace RPG.Control {
 
         private void PatrolBehaviour(){
             // start moving along patrol path
-            Vector3 nextPosition = guardPosition;
+            Vector3 nextPosition = guardPosition.value;
 
             if (patrolPath != null) {
                 if(AtWaypoint()) {

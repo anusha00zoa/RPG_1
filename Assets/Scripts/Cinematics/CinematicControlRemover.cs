@@ -10,25 +10,30 @@ namespace RPG.Cinematics {
 
         GameObject player;
 
-        private void Start() {
+        private void Awake() {
             player = GameObject.FindWithTag("Player");
+        }
 
+        private void OnEnable() {
             // when IntroSequence starts playing, disable control for the player
             GetComponent<PlayableDirector>().played += DisableControl;
             // once IntroSequence is done playing, enable control for the player
             GetComponent<PlayableDirector>().stopped += EnableControl;
         }
 
-        void EnableControl(PlayableDirector pd) {
-            // Debug.Log("EnableControl");
+        private void OnDisable() {
+            // when IntroSequence starts playing, disable control for the player
+            GetComponent<PlayableDirector>().played -= DisableControl;
+            // once IntroSequence is done playing, enable control for the player
+            GetComponent<PlayableDirector>().stopped -= EnableControl;
+        }
 
+        void EnableControl(PlayableDirector pd) {
             // enable the PlayerController component
             player.GetComponent<PlayerController>().enabled = true;
         }
 
         void DisableControl(PlayableDirector pd) {
-            // Debug.Log("DisableControl");
-
             // cancel any combat or movement we may have triggered on the player
             player.GetComponent<ActionScheduler>().CancelCurrentAction();
 

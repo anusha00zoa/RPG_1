@@ -4,9 +4,12 @@ using RPG.Core;
 using RPG.Saving;
 using RPG.Attributes;
 using RPG.Stats;
+using System.Collections.Generic;
+using GameDevTV.Utils;
+using System;
 
 namespace RPG.Combat {
-    public class Fighter : MonoBehaviour, IAction, ISaveable {
+    public class Fighter : MonoBehaviour, IAction, ISaveable, IModifierProvider {
 
         [SerializeField] float timeBetweenAttacks = 1.0f;
         [SerializeField] Transform rightHandTransform = null;
@@ -14,7 +17,7 @@ namespace RPG.Combat {
         [SerializeField] Weapon defaultWeapon = null;
         [SerializeField] string defaultWeaponName = "Unarmed";
 
-        Weapon currentWeapon = null;
+        LazyValue<Weapon> currentWeapon;
 
         float timeSinceLastAttack = Mathf.Infinity;
 
@@ -22,12 +25,13 @@ namespace RPG.Combat {
 
         Mover mover;
 
-        private void Start() {
+        private void Awake() {
             mover = GetComponent<Mover>();
+            currentWeapon = new LazyValue<Weapon>(GetDefaultWeapon);
+        }
 
-            // only load defaultWeapon if there was no weapon loaded by the saving system
-            if (currentWeapon == null)
-                EquipWeapon(defaultWeapon);
+        private void Start() {
+            currentWeapon.ForceInit();
         }
 
         private void Update() {
@@ -53,7 +57,7 @@ namespace RPG.Combat {
             }
         }
 
-        public void Attack (GameObject combatTarget) {
+        public void Attack(GameObject combatTarget) {
             GetComponent<ActionScheduler>().StartAction(this);
 
             //Debug.Log("Take that dipshit!!");
@@ -83,11 +87,8 @@ namespace RPG.Combat {
             if (weapon == null)
                 return;
 
-            currentWeapon = weapon;
-
-            // spawn the weapon and override the animation with the appropriate weapon override
-            Animator animator = GetComponent<Animator>();
-            currentWeapon.Spawn(rightHandTransform, leftHandTransform, animator);
+            currentWeapon.value = weapon;
+            AttachWeapon(weapon);
         }
 
         public Health GetTarget() {
@@ -95,7 +96,18 @@ namespace RPG.Combat {
         }
 
         private bool GetIsInRange() {
-            return Vector3.Distance(transform.position, target.transform.position) < currentWeapon.GetRange();
+            return Vector3.Distance(transform.position, target.transform.position) < currentWeapon.value.GetRange();
+        }
+
+        private Weapon GetDefaultWeapon() {
+            AttachWeapon(defaultWeapon);
+            return defaultWeapon;
+        }
+
+        private void AttachWeapon(Weapon weapon) {
+            // spawn the weapon and override the animation with the appropriate weapon override
+            Animator animator = GetComponent<Animator>();
+            weapon.Spawn(rightHandTransform, leftHandTransform, animator);
         }
 
         private void AttackBehaviour() {
@@ -122,6 +134,33 @@ namespace RPG.Combat {
             GetComponent<Animator>().ResetTrigger("attack");
         }
 
+        // method to implement ISaveable interface
+        public object CaptureState() {
+            return currentWeapon.value.name;
+        }
+
+        // method to implement ISaveable interface
+        public void RestoreState(object state) {
+            string weaponName = (string)state;
+            // allows us to load weapons across scenes by finding it in 'Weapons/Resources' folder
+            Weapon weapon = Resources.Load<Weapon>(weaponName);
+            EquipWeapon(weapon);
+        }
+
+        // method to implement IModifierProvider interface
+        public IEnumerable<float> GetAdditiveModifiers(Stat stat) {
+            if (stat == Stat.Damage) {
+               yield return currentWeapon.value.GetDamage();
+            }
+        }
+
+        // method to implement IModifierProvider interface
+        public IEnumerable<float> GetPercentageModifiers(Stat stat) {
+            if (stat == Stat.Damage) {
+               yield return currentWeapon.value.GetPercentageBonus();
+            }
+        }
+
         // begin animation event receivers
         void Hit() {
             // animation 'hit' event receiver
@@ -130,10 +169,11 @@ namespace RPG.Combat {
             if (target == null)
                 return;
 
+            // get appropriate damage for the current level + equipped weapon
             float damage = GetComponent<BaseStats>().GetStat(Stat.Damage);
             // if the equipped weapon has a projectile, launch it, if not take damage
-            if (currentWeapon.HasProjectile()) {
-                currentWeapon.LaunchProjectile(rightHandTransform, leftHandTransform, target, gameObject, damage);
+            if (currentWeapon.value.HasProjectile()) {
+                currentWeapon.value.LaunchProjectile(rightHandTransform, leftHandTransform, target, gameObject, damage);
             }
             else {
                 target.TakeDamage(damage, gameObject);
@@ -146,17 +186,5 @@ namespace RPG.Combat {
             Hit();
         }
         // end animation event receivers
-
-        // methods to implement ISaveable interface
-        public object CaptureState() {
-            return currentWeapon.name;
-        }
-
-        public void RestoreState(object state) {
-            string weaponName = (string)state;
-            // allows us to load weapons across scenes by finding it in 'Weapons/Resources' folder
-            Weapon weapon = Resources.Load<Weapon>(weaponName);
-            EquipWeapon(weapon);
-        }
     }
 }
