@@ -8,13 +8,6 @@ using UnityEngine.EventSystems;
 namespace RPG.Control {
     public class PlayerController : MonoBehaviour {
 
-        enum CursorType {
-            None,
-            Movement,
-            Combat,
-            UI
-        }
-
         [System.Serializable]
         struct CursorMapping {
             public CursorType type;
@@ -40,8 +33,8 @@ namespace RPG.Control {
                 return;
             }
 
-            // do player combat actions, dont move player while in combat
-            if (InteractWithCombat())
+            // do player combat actions or pickup actions, dont move player while in combat
+            if (InteractWithComponent())
                 return;
 
             // if no combat occured, do player movement actions
@@ -51,6 +44,23 @@ namespace RPG.Control {
             SetCursor(CursorType.None);
         }
 
+        private bool InteractWithComponent() {
+            RaycastHit[] hits = Physics.RaycastAll(GetMouseRay());
+
+            foreach(RaycastHit hit in hits) {
+                IRaycastable[] raycastables = hit.transform.GetComponents<IRaycastable>();
+
+                foreach(IRaycastable raycastable in raycastables) {
+                    if(raycastable.HandleRaycast(this)) {
+                        SetCursor(raycastable.GetCursorType());
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         private bool InteractWithUI() {
             // returns true if cursor is over UI and false if anywhere else
             if (EventSystem.current.IsPointerOverGameObject()) {
@@ -58,27 +68,6 @@ namespace RPG.Control {
                 return true;
             }
 
-            return false;
-        }
-
-        private bool InteractWithCombat() {
-            // returns a list of all the hit results
-            RaycastHit[] hits = Physics.RaycastAll(GetMouseRay());
-
-            foreach(RaycastHit hit in hits) {
-                // check if the hit object is a worthy combat component
-                if (hit.transform.TryGetComponent(out CombatTarget ct)) {
-                    // check if target is valid and alive and can be attacked
-                    if (GetComponent<Fighter>().CanAttack(ct.gameObject)) {
-                        // attack on mouse click
-                        if (Input.GetMouseButton(0)) {
-                            GetComponent<Fighter>().Attack(ct.gameObject);
-                        }
-                        SetCursor(CursorType.Combat);
-                        return true;
-                    }
-                }
-            }
             return false;
         }
 

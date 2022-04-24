@@ -213,6 +213,9 @@ MonoBehaviour:
   - type: 3
     texture: {fileID: 2800000, guid: 2e71a8202d3b4a3448ec85ced5a40265, type: 3}
     hotspot: {x: 0, y: 0}
+  - type: 4
+    texture: {fileID: 2800000, guid: 8ef7b760a0ec74c40a35969369427cd3, type: 3}
+    hotspot: {x: 0, y: 0}
 --- !u!114 &5992146784434275867
 MonoBehaviour:
   m_ObjectHideFlags: 0
