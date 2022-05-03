@@ -1,9 +1,9 @@
 using UnityEngine;
 using RPG.Movement;
-using RPG.Combat;
 using RPG.Attributes;
 using System;
 using UnityEngine.EventSystems;
+using UnityEngine.AI;
 
 namespace RPG.Control {
     public class PlayerController : MonoBehaviour {
@@ -16,8 +16,10 @@ namespace RPG.Control {
         }
 
         [SerializeField] CursorMapping[] cursorMappings = null;
+        [SerializeField] float maxNavMeshProjectionDistance = 1.0f;
 
         Health health;
+        [SerializeField] float maxNavPathLength = 40.0f;
 
         private void Awake(){
             health = GetComponent<Health>();
@@ -45,7 +47,7 @@ namespace RPG.Control {
         }
 
         private bool InteractWithComponent() {
-            RaycastHit[] hits = Physics.RaycastAll(GetMouseRay());
+            RaycastHit[] hits = RaycastAllSorted();
 
             foreach(RaycastHit hit in hits) {
                 IRaycastable[] raycastables = hit.transform.GetComponents<IRaycastable>();
@@ -72,16 +74,16 @@ namespace RPG.Control {
         }
 
         private bool InteractWithMovement() {
-            RaycastHit hit;
-
-            bool hasHit = Physics.Raycast(GetMouseRay(), out hit);
+            Vector3 targetToMoveTo;
+            bool hasHit = RaycastNavMesh(out targetToMoveTo);
             if (hasHit) {
                 // Input.GetMouseButton returns true as long as a mouse button is clicked
                 // use it to allow the player to continuously follow the mouse
                 if (Input.GetMouseButton(0)) {
                     // destination for the player's nav mesh agent
                     // player moves towards the point where the mouse clicked occured
-                    GetComponent<Mover>().StartMoveAction(hit.point, 1.0f);
+                    //GetComponent<Mover>().StartMoveAction(hit.point, 1.0f);
+                    GetComponent<Mover>().StartMoveAction(targetToMoveTo, 1.0f);
                 }
                 SetCursor(CursorType.Movement);
                 return true;
@@ -89,17 +91,77 @@ namespace RPG.Control {
             return false;
         }
 
+        private bool RaycastNavMesh(out Vector3 target) {
+            // check if the raycast has hit any unwalkable areas of the navmesh
+            target = new Vector3();
+
+            RaycastHit raycastHit;
+            bool hasHit = Physics.Raycast(GetMouseRay(), out raycastHit);
+            if (!hasHit)
+                return false;
+
+            // find nearest navmesh point
+            NavMeshHit navMeshHit;
+            bool hasHitNavMesh = NavMesh.SamplePosition(raycastHit.point, out navMeshHit, maxNavMeshProjectionDistance, NavMesh.AllAreas);
+            if (!hasHitNavMesh) {
+                return false;
+            }
+            target = navMeshHit.position;
+
+            // get path from player's position to clicked position
+            NavMeshPath path = new NavMeshPath();
+            bool hasPath = NavMesh.CalculatePath(transform.position, target, NavMesh.AllAreas, path);
+            if (!hasPath)
+                return false;
+
+            if (path.status != NavMeshPathStatus.PathComplete)
+                return false;
+
+            // we dont want paths that are extremely long or that run through enemies
+            if (GetPathLength(path) > maxNavPathLength)
+                return false;
+
+            return true;
+        }
+
+        private float GetPathLength(NavMeshPath path) {
+            float pathLength = 0.0f;
+
+            if(path.corners.Length < 2)
+                return pathLength;
+
+            for(int i = 0; i < path.corners.Length - 1; i++)
+                pathLength += Vector3.Distance(path.corners[i], path.corners[i + 1]);
+
+            return pathLength;
+        }
+
         private void SetCursor(CursorType type) {
+            // change cursor icon based om expected action by player
             CursorMapping mapping = GetCursorMapping(type);
             Cursor.SetCursor(mapping.texture, mapping.hotspot, CursorMode.Auto);
         }
 
         private CursorMapping GetCursorMapping(CursorType type) {
+            // get the correct icon based on the type of cursor
             foreach(CursorMapping mapping in cursorMappings)
                 if (mapping.type == type)
                     return mapping;
 
             return cursorMappings[0];
+        }
+
+        RaycastHit[] RaycastAllSorted() {
+            // sort all hits in raycasting based on distance
+            RaycastHit[] raycastHits = Physics.RaycastAll(GetMouseRay());
+
+            float[] distances = new float[raycastHits.Length];
+            for (int i = 0; i < raycastHits.Length; i++) {
+                distances[i] = raycastHits[i].distance;
+            }
+            Array.Sort(distances, raycastHits);
+
+            return raycastHits;
         }
 
         private static Ray GetMouseRay() {
