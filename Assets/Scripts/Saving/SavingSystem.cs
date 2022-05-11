@@ -1,9 +1,7 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -30,7 +28,7 @@ namespace RPG.Saving {
             RestoreState(LoadFile(saveFile));
         }
 
-        public void Delete(string saveFile) { 
+        public void Delete(string saveFile) {
             File.Delete(GetPathFromSaveFile(saveFile));
         }
 

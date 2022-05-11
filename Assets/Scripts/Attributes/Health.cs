@@ -2,7 +2,6 @@ using UnityEngine;
 using RPG.Saving;
 using RPG.Stats;
 using RPG.Core;
-using System;
 using GameDevTV.Utils;
 using UnityEngine.Events;
 
@@ -15,6 +14,8 @@ namespace RPG.Attributes {
         [System.Serializable]
         public class TakeDamageEvent : UnityEvent<float> {}
         [SerializeField] TakeDamageEvent takeDamage;
+
+        [SerializeField] UnityEvent onDie;
 
         private bool isDead = false;
 
@@ -72,6 +73,7 @@ namespace RPG.Attributes {
             healthPoints.value = Mathf.Max(healthPoints.value - damage, 0.0f);
 
             if (healthPoints.value == 0.0f) {
+                onDie.Invoke();
                 Die();
                 AwardExperience(instigator);
             }
@@ -79,6 +81,10 @@ namespace RPG.Attributes {
                 // trigger all the functions hooked up to this event
                 takeDamage.Invoke(damage);
             }
+        }
+
+        public void Heal(float healthToRestore) {
+            healthPoints.value = Mathf.Min(healthPoints.value + healthToRestore, GetMaxHealthPoints());
         }
 
         void Die() {
@@ -112,7 +118,7 @@ namespace RPG.Attributes {
 
         // member function required as we inherit from ISaveable
         public object CaptureState() {
-            return healthPoints;
+            return healthPoints.value;
         }
 
         // member function required as we inherit from ISaveable

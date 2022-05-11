@@ -6,7 +6,6 @@ using RPG.Attributes;
 using RPG.Stats;
 using System.Collections.Generic;
 using GameDevTV.Utils;
-using System;
 
 namespace RPG.Combat {
     public class Fighter : MonoBehaviour, IAction, ISaveable, IModifierProvider {
@@ -14,9 +13,10 @@ namespace RPG.Combat {
         [SerializeField] float timeBetweenAttacks = 1.0f;
         [SerializeField] Transform rightHandTransform = null;
         [SerializeField] Transform leftHandTransform = null;
-        [SerializeField] Weapon defaultWeapon = null;
+        [SerializeField] WeaponConfig defaultWeapon = null;
         [SerializeField] string defaultWeaponName = "Unarmed";
 
+        WeaponConfig currentWeaponConfig;
         LazyValue<Weapon> currentWeapon;
 
         float timeSinceLastAttack = Mathf.Infinity;
@@ -27,6 +27,7 @@ namespace RPG.Combat {
 
         private void Awake() {
             mover = GetComponent<Mover>();
+            currentWeaponConfig = defaultWeapon;
             currentWeapon = new LazyValue<Weapon>(GetDefaultWeapon);
         }
 
@@ -83,12 +84,12 @@ namespace RPG.Combat {
             GetComponent<Mover>().Cancel();
         }
 
-        public void EquipWeapon(Weapon weapon) {
+        public void EquipWeapon(WeaponConfig weapon) {
             if (weapon == null)
                 return;
 
-            currentWeapon.value = weapon;
-            AttachWeapon(weapon);
+            currentWeaponConfig = weapon;
+            currentWeapon.value = AttachWeapon(weapon);
         }
 
         public Health GetTarget() {
@@ -96,18 +97,17 @@ namespace RPG.Combat {
         }
 
         private bool GetIsInRange() {
-            return Vector3.Distance(transform.position, target.transform.position) < currentWeapon.value.GetRange();
+            return Vector3.Distance(transform.position, target.transform.position) < currentWeaponConfig.GetRange();
         }
 
         private Weapon GetDefaultWeapon() {
-            AttachWeapon(defaultWeapon);
-            return defaultWeapon;
+            return AttachWeapon(defaultWeapon);
         }
 
-        private void AttachWeapon(Weapon weapon) {
+        private Weapon AttachWeapon(WeaponConfig weapon) {
             // spawn the weapon and override the animation with the appropriate weapon override
             Animator animator = GetComponent<Animator>();
-            weapon.Spawn(rightHandTransform, leftHandTransform, animator);
+            return weapon.Spawn(rightHandTransform, leftHandTransform, animator);
         }
 
         private void AttackBehaviour() {
@@ -136,28 +136,28 @@ namespace RPG.Combat {
 
         // method to implement ISaveable interface
         public object CaptureState() {
-            return currentWeapon.value.name;
+            return currentWeaponConfig.name;
         }
 
         // method to implement ISaveable interface
         public void RestoreState(object state) {
             string weaponName = (string)state;
             // allows us to load weapons across scenes by finding it in 'Weapons/Resources' folder
-            Weapon weapon = Resources.Load<Weapon>(weaponName);
+            WeaponConfig weapon = Resources.Load<WeaponConfig>(weaponName);
             EquipWeapon(weapon);
         }
 
         // method to implement IModifierProvider interface
         public IEnumerable<float> GetAdditiveModifiers(Stat stat) {
             if (stat == Stat.Damage) {
-               yield return currentWeapon.value.GetDamage();
+               yield return currentWeaponConfig.GetDamage();
             }
         }
 
         // method to implement IModifierProvider interface
         public IEnumerable<float> GetPercentageModifiers(Stat stat) {
             if (stat == Stat.Damage) {
-               yield return currentWeapon.value.GetPercentageBonus();
+               yield return currentWeaponConfig.GetPercentageBonus();
             }
         }
 
@@ -171,9 +171,15 @@ namespace RPG.Combat {
 
             // get appropriate damage for the current level + equipped weapon
             float damage = GetComponent<BaseStats>().GetStat(Stat.Damage);
+
+            // check if weapon instance is not null
+            if (currentWeapon.value !=  null) {
+                currentWeapon.value.OnHit();
+            }
+
             // if the equipped weapon has a projectile, launch it, if not take damage
-            if (currentWeapon.value.HasProjectile()) {
-                currentWeapon.value.LaunchProjectile(rightHandTransform, leftHandTransform, target, gameObject, damage);
+            if (currentWeaponConfig.HasProjectile()) {
+                currentWeaponConfig.LaunchProjectile(rightHandTransform, leftHandTransform, target, gameObject, damage);
             }
             else {
                 target.TakeDamage(damage, gameObject);

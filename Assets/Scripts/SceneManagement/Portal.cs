@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.AI;
+using RPG.Control;
 
 namespace RPG.SceneManagement {
     public class Portal : MonoBehaviour {
@@ -17,7 +18,7 @@ namespace RPG.SceneManagement {
         [SerializeField] Transform spawnPoint;
         [SerializeField] DestinationIdentifier destination;
         [SerializeField] float fadeOutTime = 1.0f;
-        [SerializeField] float fadeInTime = 2.0f;
+        [SerializeField] float fadeInTime = 1.0f;
         [SerializeField] float fadeWaitTime = 0.5f;
 
         private GameObject player;
@@ -37,6 +38,9 @@ namespace RPG.SceneManagement {
 
             DontDestroyOnLoad(gameObject);
 
+            // disable player control
+            GameObject.FindWithTag("Player").GetComponent<PlayerController>().enabled = false;
+
             Fader fader = FindObjectOfType<Fader>();
             yield return fader.FadeOut(fadeOutTime);
 
@@ -51,6 +55,9 @@ namespace RPG.SceneManagement {
             }
             // Debug.Log("Scene finished loading.");
 
+            // disable player control of new scene
+            GameObject.FindWithTag("Player").GetComponent<PlayerController>().enabled = false;
+
             // Load current level
             savingWrapper.Load();
 
@@ -62,7 +69,10 @@ namespace RPG.SceneManagement {
             savingWrapper.Save();
 
             yield return new WaitForSeconds(fadeWaitTime);
-            yield return fader.FadeIn(fadeInTime);
+            fader.FadeIn(fadeInTime);
+
+            // restore control
+            GameObject.FindWithTag("Player").GetComponent<PlayerController>().enabled = true;
 
             // Destroy the portal after transitioning to prevent re-entry
             Destroy(gameObject);

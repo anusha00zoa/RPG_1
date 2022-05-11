@@ -1,6 +1,6 @@
-using System;
 using UnityEngine;
 using RPG.Attributes;
+using UnityEngine.Events;
 
 namespace RPG.Combat {
 
@@ -12,6 +12,8 @@ namespace RPG.Combat {
         [SerializeField] float lifeAfterImpact = 1.0f;
         [SerializeField] GameObject hitEffect = null;
         [SerializeField] GameObject[] destroyOnHit = null;
+
+        [SerializeField] UnityEvent onHit;
 
         float damage = 0.0f;
 
@@ -65,6 +67,8 @@ namespace RPG.Combat {
 
             // on impact, projectile should stop moving
             speed = 0.0f;
+
+            onHit.Invoke();
 
             // play hit effect if any
             if (hitEffect != null)

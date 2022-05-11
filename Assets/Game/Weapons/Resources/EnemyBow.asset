@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff6e997fb7b252744b74bce2e1a74202, type: 3}
   m_Name: EnemyBow
   m_EditorClassIdentifier: 
-  equippedPrefab: {fileID: 2218731510327057508, guid: b0439ae3fb48025449f382435b0d5120, type: 3}
+  equippedPrefab: {fileID: 3441744130580783001, guid: b0439ae3fb48025449f382435b0d5120, type: 3}
   animatorOverride: {fileID: 22100000, guid: 7382644b82fb5ff46a3fece99cbbdc15, type: 2}
   projectile: {fileID: 2810587305014077270, guid: aefd23933aef6f444bcb532982745550, type: 3}
   weaponRange: 20
   weaponDamage: 7.5
+  percentageBonus: 0
   isRightHanded: 0
