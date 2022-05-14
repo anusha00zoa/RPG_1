@@ -13,6 +13,9 @@ namespace RPG.Movement {
         private NavMeshAgent navMeshAgent;
         Health health;
 
+        [SerializeField] float maxNavPathLength = 40.0f;
+
+
         private void Awake() {
             navMeshAgent = GetComponent<NavMeshAgent>();
             health = GetComponent<Health>();
@@ -30,6 +33,23 @@ namespace RPG.Movement {
             GetComponent<ActionScheduler>().StartAction(this);
             // start movement
             MoveTo(destination, speedFraction);
+        }
+
+        public bool CanMoveTo(Vector3 destination) {
+            // get path from player's position to clicked position
+            NavMeshPath path = new NavMeshPath();
+            bool hasPath = NavMesh.CalculatePath(transform.position, destination, NavMesh.AllAreas, path);
+            if (!hasPath)
+                return false;
+
+            if (path.status != NavMeshPathStatus.PathComplete)
+                return false;
+
+            // we dont want paths that are extremely long or that run through enemies
+            if (GetPathLength(path) > maxNavPathLength)
+                return false;
+
+            return true;
         }
 
         public void MoveTo(Vector3 dest, float speedFraction) {
@@ -54,6 +74,18 @@ namespace RPG.Movement {
             float speed = localVelocity.z;
 
             GetComponent<Animator>().SetFloat("forwardSpeed", speed);
+        }
+
+        private float GetPathLength(NavMeshPath path) {
+            float pathLength = 0.0f;
+
+            if(path.corners.Length < 2)
+                return pathLength;
+
+            for(int i = 0; i < path.corners.Length - 1; i++)
+                pathLength += Vector3.Distance(path.corners[i], path.corners[i + 1]);
+
+            return pathLength;
         }
 
         // using a struct to capture / restore data - do not need to do any casting

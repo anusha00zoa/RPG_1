@@ -15,6 +15,34 @@ PrefabInstance:
       propertyPath: healthPoints
       value: 40
       objectReference: {fileID: 0}
+    - target: {fileID: 1445594024444986601, guid: 30f3b7467a479a1478f9da099e5cac66, type: 3}
+      propertyPath: takeDamage.m_PersistentCalls.m_Calls.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1445594024444986601, guid: 30f3b7467a479a1478f9da099e5cac66, type: 3}
+      propertyPath: takeDamage.m_PersistentCalls.m_Calls.Array.data[2].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1445594024444986601, guid: 30f3b7467a479a1478f9da099e5cac66, type: 3}
+      propertyPath: takeDamage.m_PersistentCalls.m_Calls.Array.data[2].m_Target
+      value: 
+      objectReference: {fileID: 1408390555958650614}
+    - target: {fileID: 1445594024444986601, guid: 30f3b7467a479a1478f9da099e5cac66, type: 3}
+      propertyPath: takeDamage.m_PersistentCalls.m_Calls.Array.data[2].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1445594024444986601, guid: 30f3b7467a479a1478f9da099e5cac66, type: 3}
+      propertyPath: takeDamage.m_PersistentCalls.m_Calls.Array.data[2].m_MethodName
+      value: Aggravate
+      objectReference: {fileID: 0}
+    - target: {fileID: 1445594024444986601, guid: 30f3b7467a479a1478f9da099e5cac66, type: 3}
+      propertyPath: takeDamage.m_PersistentCalls.m_Calls.Array.data[2].m_TargetAssemblyTypeName
+      value: RPG.Control.AIController, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 1445594024444986601, guid: 30f3b7467a479a1478f9da099e5cac66, type: 3}
+      propertyPath: takeDamage.m_PersistentCalls.m_Calls.Array.data[2].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     - target: {fileID: 2514229799375084836, guid: 30f3b7467a479a1478f9da099e5cac66, type: 3}
       propertyPath: m_RootOrder
       value: 0
@@ -61,7 +89,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8828598337957979810, guid: 30f3b7467a479a1478f9da099e5cac66, type: 3}
       propertyPath: m_RootOrder
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 8866803467198616120, guid: 30f3b7467a479a1478f9da099e5cac66, type: 3}
       propertyPath: m_Name
@@ -118,6 +146,7 @@ MonoBehaviour:
   suspicionTime: 5
   waypointDwellTime: 5
   waypointTolerance: 1
+  aggroCoolDownTime: 5
   patrolSpeedFraction: 0.2
   patrolPath: {fileID: 0}
 --- !u!114 &7598536993841073814

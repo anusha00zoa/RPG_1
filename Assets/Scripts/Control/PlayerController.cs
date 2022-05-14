@@ -17,9 +17,9 @@ namespace RPG.Control {
 
         [SerializeField] CursorMapping[] cursorMappings = null;
         [SerializeField] float maxNavMeshProjectionDistance = 1.0f;
+        [SerializeField] float raycastRadius = 1.0f;
 
         Health health;
-        [SerializeField] float maxNavPathLength = 40.0f;
 
         private void Awake(){
             health = GetComponent<Health>();
@@ -77,6 +77,9 @@ namespace RPG.Control {
             Vector3 targetToMoveTo;
             bool hasHit = RaycastNavMesh(out targetToMoveTo);
             if (hasHit) {
+                if(!GetComponent<Mover>().CanMoveTo(targetToMoveTo))
+                    return false;
+
                 // Input.GetMouseButton returns true as long as a mouse button is clicked
                 // use it to allow the player to continuously follow the mouse
                 if (Input.GetMouseButton(0)) {
@@ -108,32 +111,7 @@ namespace RPG.Control {
             }
             target = navMeshHit.position;
 
-            // get path from player's position to clicked position
-            NavMeshPath path = new NavMeshPath();
-            bool hasPath = NavMesh.CalculatePath(transform.position, target, NavMesh.AllAreas, path);
-            if (!hasPath)
-                return false;
-
-            if (path.status != NavMeshPathStatus.PathComplete)
-                return false;
-
-            // we dont want paths that are extremely long or that run through enemies
-            if (GetPathLength(path) > maxNavPathLength)
-                return false;
-
             return true;
-        }
-
-        private float GetPathLength(NavMeshPath path) {
-            float pathLength = 0.0f;
-
-            if(path.corners.Length < 2)
-                return pathLength;
-
-            for(int i = 0; i < path.corners.Length - 1; i++)
-                pathLength += Vector3.Distance(path.corners[i], path.corners[i + 1]);
-
-            return pathLength;
         }
 
         private void SetCursor(CursorType type) {
@@ -153,7 +131,7 @@ namespace RPG.Control {
 
         RaycastHit[] RaycastAllSorted() {
             // sort all hits in raycasting based on distance
-            RaycastHit[] raycastHits = Physics.RaycastAll(GetMouseRay());
+            RaycastHit[] raycastHits = Physics.SphereCastAll(GetMouseRay(), raycastRadius);
 
             float[] distances = new float[raycastHits.Length];
             for (int i = 0; i < raycastHits.Length; i++) {

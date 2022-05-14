@@ -6,11 +6,13 @@ using RPG.Attributes;
 using RPG.Stats;
 using System.Collections.Generic;
 using GameDevTV.Utils;
+using System;
 
 namespace RPG.Combat {
     public class Fighter : MonoBehaviour, IAction, ISaveable, IModifierProvider {
 
         [SerializeField] float timeBetweenAttacks = 1.0f;
+
         [SerializeField] Transform rightHandTransform = null;
         [SerializeField] Transform leftHandTransform = null;
         [SerializeField] WeaponConfig defaultWeapon = null;
@@ -48,7 +50,7 @@ namespace RPG.Combat {
                 return;
 
             // get within range of the combat target
-            if (!GetIsInRange()) {
+            if (!GetIsInRange(target.transform)) {
                 mover.MoveTo(target.transform.position, 1.0f);
             }
             else {
@@ -66,8 +68,14 @@ namespace RPG.Combat {
         }
 
         public bool CanAttack(GameObject combatTarget) {
+            if (combatTarget == null)
+                return false;
+
+            if (!GetComponent<Mover>().CanMoveTo(combatTarget.transform.position) && !GetIsInRange(combatTarget.transform))
+                return false;
+
             // if there is no target and if the target is not dead, then we can attack
-            if(combatTarget != null && !combatTarget.GetComponent<Health>().IsDead())
+            if(!combatTarget.GetComponent<Health>().IsDead())
                 return true;
 
             return false;
@@ -82,32 +90,6 @@ namespace RPG.Combat {
 
             // cancel movement
             GetComponent<Mover>().Cancel();
-        }
-
-        public void EquipWeapon(WeaponConfig weapon) {
-            if (weapon == null)
-                return;
-
-            currentWeaponConfig = weapon;
-            currentWeapon.value = AttachWeapon(weapon);
-        }
-
-        public Health GetTarget() {
-            return target;
-        }
-
-        private bool GetIsInRange() {
-            return Vector3.Distance(transform.position, target.transform.position) < currentWeaponConfig.GetRange();
-        }
-
-        private Weapon GetDefaultWeapon() {
-            return AttachWeapon(defaultWeapon);
-        }
-
-        private Weapon AttachWeapon(WeaponConfig weapon) {
-            // spawn the weapon and override the animation with the appropriate weapon override
-            Animator animator = GetComponent<Animator>();
-            return weapon.Spawn(rightHandTransform, leftHandTransform, animator);
         }
 
         private void AttackBehaviour() {
@@ -132,6 +114,32 @@ namespace RPG.Combat {
         private void StopAttack() {
             GetComponent<Animator>().SetTrigger("stopAttack");
             GetComponent<Animator>().ResetTrigger("attack");
+        }
+
+        public void EquipWeapon(WeaponConfig weapon) {
+            if (weapon == null)
+                return;
+
+            currentWeaponConfig = weapon;
+            currentWeapon.value = AttachWeapon(weapon);
+        }
+
+        public Health GetTarget() {
+            return target;
+        }
+
+        private bool GetIsInRange(Transform targetTransform) {
+            return Vector3.Distance(transform.position, targetTransform.position) < currentWeaponConfig.GetRange();
+        }
+
+        private Weapon GetDefaultWeapon() {
+            return AttachWeapon(defaultWeapon);
+        }
+
+        private Weapon AttachWeapon(WeaponConfig weapon) {
+            // spawn the weapon and override the animation with the appropriate weapon override
+            Animator animator = GetComponent<Animator>();
+            return weapon.Spawn(rightHandTransform, leftHandTransform, animator);
         }
 
         // method to implement ISaveable interface
